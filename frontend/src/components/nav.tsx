@@ -31,7 +31,7 @@ const Navigation: React.FC<NavigationProps> = ({
           <div className="relative ml-3">
             <Menu>
               <Menu.Button className="text-center inline-flex items-center text-white text-sm underline-offset-2 hover:underline">
-                {userInfo?.attributes?.email}
+                Hi {userInfo?.username}
                 <ChevronDownIcon className="w-3 h-3 ml-1 text-white" />
               </Menu.Button>
               <Menu.Items className="absolute right-0 z-10 mt-2 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">

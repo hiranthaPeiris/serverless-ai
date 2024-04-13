@@ -1,21 +1,23 @@
 import { Outlet } from "react-router-dom";
 import { useEffect, useState } from "react";
 // import { Auth } from "aws-amplify";
+import {signOut,getCurrentUser } from "aws-amplify/auth"
 import Navigation from "../components/nav";
 import Footer from "../components/Footer";
 
 const Layout: React.FC = () => {
   const [userInfo, setUserInfo] = useState<any>(null);
 
-//   useEffect(() => {
-//     (async () => setUserInfo(await Auth.currentUserInfo()))();
-//   }, []);
+  useEffect(() => {
+    (async () => setUserInfo(await getCurrentUser()))();
+  }, []);
 
+  console.log(userInfo)
   const handleSignOutClick = async (
     event: React.MouseEvent<HTMLButtonElement>
   ) => {
     event.preventDefault();
-    // await Auth.signOut();
+    await signOut();
   };
 
   return (
