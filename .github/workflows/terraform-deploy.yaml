@@ -15,11 +15,16 @@ on:
 env:
  # verbosity setting for Terraform logs
  TF_LOG: INFO
+ PRODUCT: serverless-ai
+ SERVICE: static-web
+ CI_ENVIRONMENT_NAME: ${{ vars.CI_ENVIRONMENT_NAME }}
  # Credentials for deployment to AWS
  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+ AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
  # S3 bucket for the Terraform state
  BUCKET_TF_STATE: ${{ secrets.BUCKET_TF_STATE}}
+
  
 jobs:
   terraform:
@@ -51,4 +56,28 @@ jobs:
         id: validate
         run: terraform validate
    
-        
+  terraform-plan:
+    name: "Plan Terraform"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        # We keep Terraform files in the terraform directory.
+        working-directory: ./infra
+    steps:
+      - name: Checkout the repository to the runner
+        uses: actions/checkout@v2
+    
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.3.0
+    
+      - name: Terraform init
+        id: init
+        run: terraform init -reconfigure -backend-config="bucket=$BUCKET_TF_STATE" -backend-config="key=$PRODUCT/$SERVICE/$CI_ENVIRONMENT_NAME/terraform.tfstate" -backend-config="region=$AWS_DEFAULT_REGION"
+
+      - name: Terraform plan
+        id: plan
+        run: terraform plan -var-file=$CI_ENVIRONMENT_NAME.tfvars -var "env=$CI_ENVIRONMENT_NAME" -out=$CI_ENVIRONMENT_NAME.tfplan
+        # continue-on-error: true
