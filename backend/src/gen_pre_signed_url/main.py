@@ -11,11 +11,11 @@ logger = Logger()
 S3_BUCKET = os.environ["S3_BUCKET"]
 REGION = os.environ["REGION"]
 
-# s3_client = boto3.client('s3',endpoint_url=f"https://s3.{REGION}.amazonaws.com",
-#     config=Config(
-#         s3={"addressing_style": "virtual"}, region_name=REGION, signature_version="s3v4"
-#     ),)
-s3_client = boto3.client('s3')
+s3_client = boto3.client('s3',endpoint_url=f"https://s3.{REGION}.amazonaws.com",
+    config=Config(
+        s3={"addressing_style": "virtual"}, region_name=REGION, signature_version="s3v4"
+    ),)
+#s3_client = boto3.client('s3')
 
 def generate_presinged_url(key) -> str:
 
@@ -24,8 +24,8 @@ def generate_presinged_url(key) -> str:
         pre_signedURL = s3_client.generate_presigned_url( ClientMethod="put_object",
                                                             Params={
                                                                 "Bucket": S3_BUCKET,
-                                                                "Key": key
-                                                                # "ContentType": "application/pdf",
+                                                                "Key": key,
+                                                                "ContentType": "application/pdf",
                                                             },
                                                             ExpiresIn=3600)
         logger.debug(f"Pre-sign URL: {pre_signedURL}")
@@ -60,7 +60,7 @@ def lambda_handler(event: dict, context: LambdaContext) -> str:
         suffix = shortuuid.ShortUUID().random(length=4)
         key = f"{user_id}/{file_name}-{suffix}.pdf/{file_name}-{suffix}.pdf"
     else:
-        key = f"{user_id}/{file_name}/{file_name}.pdf"
+        key = f"{user_id}/{file_name}.pdf/{file_name}.pdf"
 
     presigned_url = generate_presinged_url(key=key)
     logger.info(f"{key}")

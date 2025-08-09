@@ -1,31 +1,23 @@
 import { useState, useEffect } from "react";
-// import { API } from "aws-amplify";
+import { get } from "aws-amplify/api";
 import { Link } from "react-router-dom";
 import DocumentDetail from "./DocumentDetail";
 import { ArrowPathRoundedSquareIcon } from "@heroicons/react/24/outline";
 import { Document } from "../common/types";
-import Loading from "../assets/loading-grid.svg";
+import Loading from "../../public/loading-grid.svg";
 
 const DocumentList: React.FC = () => {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [listStatus, setListStatus] = useState<string>("idle");
 
-//   Sample Data
-  const docdata :  Document = {
-    documentid:"345",
-    userid: "sandy",
-    filename: "string",
-    filesize: "32456",
-    docstatus: "string",
-    created: "12-02-2024",
-    pages: "4"
-  }
   const fetchData = async () => {
     setListStatus("loading");
-    // const documents = await API.get("serverless-pdf-chat", "/doc", {});
+    const response = await get({
+      apiName: "serverless-pdf-chat", path:"doc"
+    }).response;
+    const docs = await response.body.json() as unknown as Document[]
     setListStatus("idle");
-    setDocuments([docdata]);
-    // setDocuments(documents);
+    setDocuments(docs);
   };
 
   useEffect(() => {
@@ -53,12 +45,11 @@ const DocumentList: React.FC = () => {
           documents.length > 0 &&
           documents.map((document: Document) => (
             <Link
-            //   to={`/doc/${document.documentid}/${document.conversations[0].conversationid}/`}
-              to={`/doc/${document.documentid}/`}
+              to={`/doc/${document.documentid}/${document.conversations[0].conversationid}/`}
               key={document.documentid}
               className="block p-6 bg-white border border-gray-200 rounded hover:bg-gray-100"
             >
-              <DocumentDetail {...document} />
+              <DocumentDetail document={document} onDocumentDeleted={fetchData}/>
             </Link>
           ))}
       </div>
