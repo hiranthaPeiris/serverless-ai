@@ -17,15 +17,50 @@ resource "aws_s3_bucket_policy" "document_s3_policy" {
     Version = "2012-10-17",
     Statement = [
       {
-        Action    = ["s3:Get*",
-                    "s3:List*",
-                    "s3:PutObject",
-                    "s3:PutObjectAcl"],
+        Action = ["s3:Get*",
+          "s3:List*",
+          "s3:PutObject",
+          "s3:PutObjectAcl"],
 
         Effect    = "Allow",
-        Resource  = ["${aws_s3_bucket.document_s3.arn}/*","arn:aws:s3:::serverless-ai-yh89th"],
+        Resource  = ["${aws_s3_bucket.document_s3.arn}/*", "${aws_s3_bucket.document_s3.arn}"],
+        Principal = {
+          AWS = aws_iam_role.lambda_role.arn
+        }
+      },
+      {
+        Sid       = "EnforceHttpsSid"
+        Effect    = "Deny"
         Principal = "*"
+        Action    = "s3:*"
+        Resource = [
+          aws_s3_bucket.document_s3.arn,
+          "${aws_s3_bucket.document_s3.arn}/*"
+        ]
+        Condition = {
+          Bool = {
+            "aws:SecureTransport" = "false"
+          }
+        }
       }
     ]
   })
+}
+
+resource "aws_s3_bucket_cors_configuration" "this" {
+  bucket = aws_s3_bucket.document_s3.id
+
+  cors_rule {
+    allowed_headers = ["*"]
+
+    allowed_methods = [
+      "GET",
+      "PUT",
+      "HEAD",
+      "POST",
+      "DELETE",
+    ]
+
+    allowed_origins = ["*"]
+  }
 }

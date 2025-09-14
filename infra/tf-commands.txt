@@ -1,0 +1,3 @@
+terraform init -reconfigure -backend-config="bucket=tfstate-myterraform-672" -backend-config="key=serverless-ai/infra/dev/terraform.tfstate" -backend-config="region=ap-southeast-1"
+terraform plan -var-file=dev.tfvars -var "env=dev" -out=dev.tfplan
+terraform apply -var-file=dev.tfvars -var "env=dev"

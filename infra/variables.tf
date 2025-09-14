@@ -24,3 +24,10 @@ variable "python_runtime" {
   type        = string
   default     = "python3.11"
 }
+
+variable "region" {
+  description = "The AWS region to deploy resources in"
+  type        = string
+  default     = "ap-southeast-1"
+  
+}
