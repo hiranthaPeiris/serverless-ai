@@ -10,11 +10,13 @@ import boto3
 import os,json
 import shortuuid
 
-import utils
+import util
 tracer = Tracer()
 logger = Logger()
 app = APIGatewayHttpResolver()
 
+DOCUMENTS_TABLE = os.environ["DOCUMENTS_TABLE"]
+MEMORY_TABLE = os.environ["MEMORY_TABLE"]
 
 @app.get("/api/generate_presigned_url")
 @tracer.capture_method
@@ -28,14 +30,14 @@ def get_todos():
     key = f"{user_id}/{file_name}/{file_name_request}"
 
     #check if file exisits
-    exists = utils.check_file_exists(key)
+    exists = util.check_file_exists(key)
     if exists:
         suffix = shortuuid.ShortUUID().random(length=4)
         key = f"{user_id}/{file_name}-{suffix}.pdf/{file_name}-{suffix}.pdf"
     else:
         key = f"{user_id}/{file_name}.pdf/{file_name}.pdf"
 
-    presigned_url = utils.generate_presinged_url(key=key)
+    presigned_url = util.generate_presinged_url(key=key)
     logger.info(f"{key}")
 
     # You can log entire objects too
@@ -60,11 +62,33 @@ def get_todos():
 
 @app.get("/api/doc")
 def get_doc():
-    todos: Response = requests.get("https://jsonplaceholder.typicode.com/todos")
-    todos.raise_for_status()
+    user_id = app.current_event.query_string_parameters.get("user_id")
+    document_id = app.current_event.query_string_parameters.get("document_id")
+    conversation_id = app.current_event.query_string_parameters.get("conversation_id")
+    # Simulating a document retrieval based on user_id and document_id
 
-    # for brevity, we'll limit to the first 10 only
-    return {"todos": todos.json()[:3]}
+    document = util.get_documents(DOCUMENTS_TABLE, user_id=user_id, document_id=document_id)
+    document["conversations"] = sorted(document["conversations"], key=lambda x: x["created"], reverse=True)
+    logger.info(f"Document: {document}")
+
+    messages = util.get_documents(MEMORY_TABLE, SessionID=conversation_id)
+    logger.info(f"Messages: {messages}")
+
+    return {
+        "statusCode": 200,
+        "headers": {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Headers": "*",
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "*",
+        },
+        "body": json.dumps({
+            "conversation_id": conversation_id,
+            "document": document,
+            "messages": messages
+        }, default=str
+        )
+    }
 
 @app.get("/doc/{documentid}/{conversationid}")
 def get_doc_by_id(documentid: str, conversationid: str):

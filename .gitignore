@@ -48,3 +48,9 @@ amplifytools.xcconfig
 _build/
 
 .terraform/
+.terraform.lock.hcl
+.terragrunt-cache/
+
+*.zip
+.venv
+.devbox

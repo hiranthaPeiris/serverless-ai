@@ -1,4 +1,4 @@
-    resource "aws_cognito_user_pool" "this" {
+resource "aws_cognito_user_pool" "this" {
   name = "serverless-ai-pool"
 
   auto_verified_attributes = ["email"]
@@ -20,7 +20,7 @@
 }
 
 resource "aws_cognito_user_pool_client" "this" {
-  name         = "serverless-ai-client"
-  user_pool_id = aws_cognito_user_pool.this.id
+  name            = "serverless-ai-client"
+  user_pool_id    = aws_cognito_user_pool.this.id
   generate_secret = false
 }

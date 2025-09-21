@@ -1,11 +1,17 @@
 resource "aws_dynamodb_table" "document_table" {
-  name           = "document_table"
-  billing_mode   = "PAY_PER_REQUEST"
-  hash_key       = "document_id"
+  name         = "document_table"
+  billing_mode = "PAY_PER_REQUEST"
+  range_key    = "document_id"
+  hash_key     = "user_id"
 
 
   attribute {
     name = "document_id"
+    type = "S"
+  }
+
+  attribute {
+    name = "user_id"
     type = "S"
   }
 
@@ -16,13 +22,13 @@ resource "aws_dynamodb_table" "document_table" {
 }
 
 resource "aws_dynamodb_table" "conversation_table" {
-  name           = "conversation_table"
-  billing_mode   = "PAY_PER_REQUEST"
-  hash_key       = "conversation_id"
+  name         = "conversation_table"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "SessionID"
 
 
   attribute {
-    name = "conversation_id"
+    name = "SessionID"
     type = "S"
   }
 

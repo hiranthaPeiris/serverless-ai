@@ -20,10 +20,10 @@ resource "aws_s3_bucket_policy" "document_s3_policy" {
         Action = ["s3:Get*",
           "s3:List*",
           "s3:PutObject",
-          "s3:PutObjectAcl"],
+        "s3:PutObjectAcl"],
 
-        Effect    = "Allow",
-        Resource  = ["${aws_s3_bucket.document_s3.arn}/*", "${aws_s3_bucket.document_s3.arn}"],
+        Effect   = "Allow",
+        Resource = ["${aws_s3_bucket.document_s3.arn}/*", "${aws_s3_bucket.document_s3.arn}"],
         Principal = {
           AWS = aws_iam_role.lambda_role.arn
         }
